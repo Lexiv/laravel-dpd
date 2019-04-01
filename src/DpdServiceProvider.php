@@ -74,5 +74,7 @@ class DpdServiceProvider extends ServiceProvider {
 
             return $status;
         });
+
+        $this->app->alias([DPDShipment::class, DPDParcelStatus::class], 'laravel-dpd');
     }
 }
