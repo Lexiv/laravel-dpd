@@ -1,10 +1,8 @@
 <?php namespace BernhardK\Dpd;
 
-use Exception;
-use Illuminate\Support\Facades\Log;
 use Soapclient;
 use SoapFault;
-use SOAPHeader;
+use BernhardK\Dpd\Exceptions\DpdAuthorisationException;
 
 class DPDAuthorisation{
  
@@ -22,8 +20,9 @@ class DPDAuthorisation{
 
     /**
      * Get an authorisationtoken from the DPD webservice
-     * @param array   $array              
-     * @param boolean $wsdlCache, cache the wsdl
+     * @param array $array
+     * @param boolean $wsdlCache , cache the wsdl
+     * @throws DpdAuthorisationException
      */
     public function __construct($array, $wsdlCache = true)
     {
@@ -60,7 +59,7 @@ class DPDAuthorisation{
 
         }
         catch (SoapFault $e){
-            Log::emergency('DPD: '.$e->detail->authenticationFault->errorMessage);
+            throw DpdAuthorisationException::because($e->detail->authenticationFault->errorMessage);
         } 
     }    
 }

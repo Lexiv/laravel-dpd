@@ -1,10 +1,9 @@
 <?php namespace BernhardK\Dpd;
 
-use Exception;
-use Illuminate\Support\Facades\Log;
 use Soapclient;
 use SoapFault;
 use SOAPHeader;
+use BernhardK\Dpd\Exceptions\DpdParcelException;
 
 class DPDParcelStatus{
 
@@ -16,7 +15,8 @@ class DPDParcelStatus{
     const SOAPHEADER_URL = 'http://dpd.com/common/service/types/Authentication/2.0';
 
     /**
-     * @param object DPDAuthorisation $authorisationObject
+     * @param DPDAuthorisation $authorisationObject
+     * @param bool $wsdlCache
      */
     public function __construct(DPDAuthorisation $authorisationObject, $wsdlCache = true)
     {
@@ -29,8 +29,10 @@ class DPDParcelStatus{
 
     /**
      * Get the parcel's current status
-     * @param  string $awb
-     * @return array 
+     * @param string $awb
+     * @return array
+     * @throws DpdParcelException
+     * @throws SoapFault
      */
     public function getStatus($awb)
     {
@@ -57,7 +59,7 @@ class DPDParcelStatus{
 
             $check = (array)$response->trackingresult;
             if (empty($check)) {
-                Log::emergency('DPD: Parcel not found');
+                throw DpdParcelException::notFound();
                 return array();
             }
 
@@ -73,7 +75,7 @@ class DPDParcelStatus{
         }
         catch (SoapFault $e)
         {
-            Log::emergency('DPD: '.$e->faultstring);
+            throw $e;
         }
     }
 }
